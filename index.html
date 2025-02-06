@@ -557,6 +557,16 @@
                 return;
             }
 
+            // 高级模型再次验证密码
+            if (modelType !== 'Qwen/Qwen2.5-7B-Instruct') {
+                const password = prompt('使用高级翻译模型需要再次验证密码：');
+                if (password !== '891762') {
+                    alert('密码错误，请使用标准翻译模型或输入正确的密码');
+                    document.getElementById('modelType').value = 'Qwen/Qwen2.5-7B-Instruct';
+                    return;
+                }
+            }
+
             try {
                 translateButton.disabled = true;
                 targetText.value = '翻译中...';
@@ -708,6 +718,18 @@
 
         // 获取拼写检查容器的DOM元素
         const spellCheckContainer = document.getElementById('spellCheckContainer');
+
+        // 添加模型选择变更事件处理
+        document.getElementById('modelType').addEventListener('change', function(e) {
+            const selectedModel = e.target.value;
+            if (selectedModel !== 'Qwen/Qwen2.5-7B-Instruct') {
+                const password = prompt('高级翻译模型仍在测试中，暂时需要密码才能使用。\n请输入访问密码：');
+                if (password !== '891762') {
+                    alert('密码错误，已切换回标准翻译模型');
+                    e.target.value = 'Qwen/Qwen2.5-7B-Instruct';
+                }
+            }
+        });
     </script>
 </body>
 </html>
