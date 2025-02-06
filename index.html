@@ -402,43 +402,59 @@
             const context = document.getElementById('emailContext').value.trim();
             const lang = document.getElementById('emailLang').value;
             const tone = document.getElementById('emailTone').value;
+            const emailResult = document.getElementById('emailResult');
 
             if (!subject || !context) {
                 alert('请填写邮件主题和内容');
                 return;
             }
 
-            const emailResult = document.getElementById('emailResult');
             emailResult.value = '正在生成邮件...';
 
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${API_KEY}`
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        model: "glm-4-flash",
-                        messages: [{
-                            role: "system",
-                            content: `你是一位专业的${lang === 'zh' ? '中文' : '英文'}邮件写作助手。
-要求：
-1. 语言：${lang === 'zh' ? '中文' : 'English'}
-2. 语气：${tone === 'professional' ? '专业正式' : tone === 'friendly' ? '友好温和' : '紧急'}
-3. 主题：${subject}
-4. 根据以下简要描述撰写完整邮件：${context}`
-                        }]
+                        model: "Qwen/Qwen2.5-7B-Instruct",
+                        messages: [
+                            {
+                                role: "system",
+                                content: `你是一位专业的${lang === 'zh' ? '中文' : '英文'}邮件写作助手。
+请根据以下信息撰写一封完整的邮件：
+1. 使用语言：${lang === 'zh' ? '中文' : 'English'}
+2. 邮件语气：${tone === 'professional' ? '专业正式' : tone === 'friendly' ? '友好温和' : '紧急'}
+3. 邮件主题：${subject}
+4. 内容描述：${context}
+
+请确保：
+1. 包含适当的称谓和结束语
+2. 使用恰当的邮件格式
+3. 语言表达专业得体
+4. 符合商务邮件写作规范`
+                            }
+                        ],
+                        stream: false,
+                        max_tokens: 2000,
+                        temperature: 0.7,
+                        top_p: 0.7
                     })
                 });
 
                 const data = await response.json();
-                const result = data.choices[0].message.content;
-                emailResult.value = result;
+                
+                if (data.choices && data.choices[0]) {
+                    emailResult.value = data.choices[0].message.content.trim();
+                } else {
+                    throw new Error('邮件生成服务返回的数据格式不正确');
+                }
 
             } catch (error) {
                 console.error('邮件生成错误:', error);
-                emailResult.value = '生成失败，请检查网络连接';
+                emailResult.value = `生成失败: ${error.message}`;
             }
         }
 
@@ -599,49 +615,69 @@
                 return;
             }
 
-            spellCheckResult.value = '正在检查...';
-            spellCheckRewrite.value = '正在改写...';
-
             try {
+                spellCheckResult.value = '正在检查...';
+                spellCheckRewrite.value = '正在改写...';
+
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${API_KEY}`
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        model: "glm-4",
-                        messages: [{
-                            role: "system",
-                            content: `你是一位专业的文字校对专家。请对以下${lang}文本进行校对和改写，要求：
-1. 检查拼写、语法和标点符号错误
-2. 语气：${tone === 'professional' ? '专业正式' : tone === 'friendly' ? '友好温和' : '紧急'}
-3. 分别输出：
-   - 错误分析：列出所有发现的错误
-   - 改写建议：提供改进后的完整文本`
-                        }, {
-                            role: "user",
-                            content: text
-                        }]
+                        model: "Qwen/Qwen2.5-7B-Instruct",
+                        messages: [
+                            {
+                                role: "system",
+                                content: `你是一位专业的文字校对专家。请对以下${lang === 'zh' ? '中文' : '英文'}文本进行详细的校对和改写。
+
+请按照以下格式输出：
+===错误分析===
+1. 列出所有拼写错误
+2. 列出所有语法错误
+3. 列出所有标点符号错误
+4. 列出任何其他表达不准确的地方
+
+===改写建议===
+按照${tone === 'professional' ? '专业正式' : 
+      tone === 'casual' ? '口语轻松' : 
+      tone === 'academic' ? '学术严谨' : 
+      tone === 'email' ? '商务邮件' : '文学优雅'}的语气，
+提供改进后的完整文本。`
+                            },
+                            {
+                                role: "user",
+                                content: text
+                            }
+                        ],
+                        stream: false,
+                        max_tokens: 2000,
+                        temperature: 0.7,
+                        top_p: 0.7
                     })
                 });
 
                 const data = await response.json();
-                const result = data.choices[0].message.content;
-
-                // 分割错误分析和改写建议
-                const parts = result.split('改写建议：');
-                if (parts.length === 2) {
-                    spellCheckResult.value = parts[0].replace('错误分析：', '').trim();
-                    spellCheckRewrite.value = parts[1].trim();
+                
+                if (data.choices && data.choices[0]) {
+                    const result = data.choices[0].message.content;
+                    // 分割错误分析和改写建议
+                    const parts = result.split('===改写建议===');
+                    if (parts.length === 2) {
+                        spellCheckResult.value = parts[0].replace('===错误分析===', '').trim();
+                        spellCheckRewrite.value = parts[1].trim();
+                    } else {
+                        spellCheckResult.value = result;
+                        spellCheckRewrite.value = '无法解析改写建议';
+                    }
                 } else {
-                    spellCheckResult.value = result;
-                    spellCheckRewrite.value = '无法解析改写建议';
+                    throw new Error('校对服务返回的数据格式不正确');
                 }
 
             } catch (error) {
                 console.error('校对错误:', error);
-                spellCheckResult.value = '校对失败，请检查网络连接';
+                spellCheckResult.value = `校对失败: ${error.message}`;
                 spellCheckRewrite.value = '';
             }
         }
