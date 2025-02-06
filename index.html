@@ -392,8 +392,9 @@
         }
 
         // 智谱API配置
-        const API_URL = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
-        const API_KEY = '1587b8000ef24100bdb968a0099dffb7.EHi3ONY5FgtIn0Me';
+        const API_URL = 'https://api.siliconflow.cn/v1/chat/completions';
+        const API_KEY = 'sk-oaftmmooxjubczujvyeoxrpvrooevdoweqllxcasvbdogkld';
+        const MODEL_NAME = 'Qwen/Qwen2.5-7B-Instruct';
 
         // 邮件生成函数
         async function generateEmail() {
@@ -418,7 +419,7 @@
                         'Authorization': API_KEY
                     },
                     body: JSON.stringify({
-                        model: "glm-4-flash",
+                        model: MODEL_NAME,
                         messages: [{
                             role: "system",
                             content: `你是一位专业的${lang === 'zh' ? '中文' : '英文'}邮件写作助手。
@@ -538,7 +539,7 @@
                         'Authorization': API_KEY
                     },
                     body: JSON.stringify({
-                        model: "glm-4",
+                        model: MODEL_NAME,
                         messages: [{
                             role: "system",
                             content: `你是一位专业的法律翻译专家。请将文本从${sourceLang.value}翻译成${targetLang.value}，要求：
@@ -599,7 +600,7 @@
                         'Authorization': API_KEY
                     },
                     body: JSON.stringify({
-                        model: "glm-4",
+                        model: MODEL_NAME,
                         messages: [{
                             role: "system",
                             content: `你是一位专业的文字校对专家。请对以下${lang}文本进行校对和改写，要求：
