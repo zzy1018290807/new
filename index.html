@@ -541,6 +541,8 @@
             const sourceText = document.getElementById('sourceText');
             const targetText = document.getElementById('targetText');
             const translateButton = document.getElementById('translateButton');
+            const sourceLang = document.getElementById('sourceLang').value;
+            const targetLang = document.getElementById('targetLang').value;
             
             if (!sourceText.value.trim()) {
                 alert('请输入要翻译的文本');
@@ -565,7 +567,7 @@
                         messages: [
                             {
                                 role: "system",
-                                content: "你是一个专业的翻译助手，请将用户输入的文本翻译成英文，保持专业性和准确性。"
+                                content: `你是一个专业的翻译助手，请将用户输入的${sourceLang === 'zh' ? '中文' : '英文'}文本翻译成${targetLang === 'zh' ? '中文' : '英文'}，保持专业性和准确性。`
                             },
                             {
                                 role: "user",
