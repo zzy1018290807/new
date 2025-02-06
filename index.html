@@ -426,7 +426,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        model: "Qwen/Qwen2.5-7B-Instruct",
+                        model: "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
                         messages: [
                             {
                                 role: "system",
@@ -585,7 +585,7 @@
                         messages: [
                             {
                                 role: "system",
-                                content: `你是一个专业的翻译助手，请将用户输入的${sourceLang === 'zh' ? '中文' : '英文'}文本翻译成${targetLang === 'zh' ? '中文' : '英文'}，保持专业性和准确性。`
+                                content: `你是一个专业的翻译助手，请将用户输入的${sourceLang === 'zh' ? '中文' : '英文'}文本翻译成${targetLang === 'zh' ? '中文' : '英文'}，保持专业性和准确性。提供的文本可能是从PDF文档里直接翻译的，所以有些英文、中文单词可能是模糊的，句子可能被拆分，请将提供的全部文本视为一整段内容。`
                             },
                             {
                                 role: "user",
@@ -646,7 +646,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        model: "Qwen/Qwen2.5-7B-Instruct",
+                        model: "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
                         messages: [
                             {
                                 role: "system",
